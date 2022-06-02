@@ -13,6 +13,7 @@ else
 fi
 
 source $controlfolder/control.txt
+source $controlfolder/tasksetter
 
 get_controls
 
@@ -47,7 +48,7 @@ $ESUDO rm -rf ~/.config/Ultionus
 $ESUDO ln -s /$GAMEDIR/conf/Ultionus ~/.config/
 $ESUDO chmod 666 /dev/uinput
 $GPTOKEYB "box86" -c "./ultionus.gptk" &
-$BINDIR/box86 $GAMEDIR/runner
+$TASKSET $BINDIR/box86 $GAMEDIR/runner
 $ESUDO kill -9 $(pidof gptokeyb)
 $ESUDO systemctl restart oga_events &
 printf "\033c" >> /dev/tty1
