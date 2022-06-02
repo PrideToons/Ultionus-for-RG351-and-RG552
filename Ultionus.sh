@@ -1,23 +1,21 @@
 #!/bin/bash
 
-ESUDO="sudo"
-if [ -f "/storage/.config/.OS_ARCH" ]; then
-  ESUDO=""
+if [ -d "/opt/system/Tools/PortMaster/" ]; then
+  controlfolder="/opt/system/Tools/PortMaster"
+elif [ -d "/opt/tools/PortMaster/" ]; then
+  controlfolder="/opt/tools/PortMaster"
+elif [ -d "/roms/ports" ]; then
+  controlfolder="/roms/ports/PortMaster"
+ elif [ -d "/roms2/ports" ]; then
+  controlfolder="/roms2/ports/PortMaster"
+else
+  controlfolder="/storage/roms/ports/PortMaster"
 fi
 
-if [[ -e "/dev/input/by-path/platform-ff300000.usb-usb-0:1.2:1.0-event-joystick" ]]; then
-  param_device="anbernic"
-elif [[ -e "/dev/input/by-path/platform-odroidgo2-joypad-event-joystick" ]]; then
-    if [[ ! -z $(cat /etc/emulationstation/es_input.cfg | grep "190000004b4800000010000001010000") ]]; then
-	  param_device="oga"
-	else
-	  param_device="rk2020"
-	fi
-elif [[ -e "/dev/input/by-path/platform-odroidgo3-joypad-event-joystick" ]]; then
-  param_device="ogs"
-else
-  param_device="chi"
-fi
+source $controlfolder/control.txt
+source $controlfolder/tasksetter
+
+get_controls
 
 if [ -f "/opt/system/Advanced/Switch to main SD for Roms.sh" ]; then
   GAMEDIR="/roms2/ports/Ultionus"
@@ -48,8 +46,9 @@ cd $GAMEDIR
 
 $ESUDO rm -rf ~/.config/Ultionus
 $ESUDO ln -s /$GAMEDIR/conf/Ultionus ~/.config/
-$ESUDO ./oga_controls box86 $param_device &
-$BINDIR/box86 $GAMEDIR/runner
-$ESUDO kill -9 $(pidof oga_controls)
+$ESUDO chmod 666 /dev/uinput
+$GPTOKEYB "box86" -c "./ultionus.gptk" &
+$TASKSET $BINDIR/box86 $GAMEDIR/runner
+$ESUDO kill -9 $(pidof gptokeyb)
 $ESUDO systemctl restart oga_events &
 printf "\033c" >> /dev/tty1
